@@ -453,19 +453,34 @@ NodeParser.prototype.paintText = function(container) {
     this.renderer.font(container.parent.color('color'), container.parent.css('fontStyle'), container.parent.css('fontVariant'), weight, size, family);
     if (shadows.length) {
         // TODO: support multiple text shadows
-        this.renderer.fontShadow(shadows[0].color, shadows[0].offsetX, shadows[0].offsetY, shadows[0].blur);
+        for (var i = 0; i < shadows.length; i += 1) {
+            this.renderer.ctx.shadowColor = shadows[i].color.toString();
+            this.renderer.ctx.shadowOffSetX = shadows[i].offsetX;
+            this.renderer.ctx.shadowOffsetY = shadows[i].offsety;
+            this.renderer.ctx.shadowBlur = shadows[i].blur;
+            //this.renderer.fontShadow(shadows[i].color, shadows[i].offsetX, shadows[i].offsetY, shadows[i].blur);
+
+            this.renderer.clip(container.parent.clip, function() {
+                textList.map(this.parseTextBounds(container), this).forEach(function(bounds, index) {
+                    if (bounds) {
+                        this.renderer.text(textList[index], bounds.left, bounds.bottom);
+                        this.renderTextDecoration(container.parent, bounds, this.fontMetrics.getMetrics(family, size));
+                    }
+                }, this);
+            }, this, container.parent);
+        }
     } else {
         this.renderer.clearShadow();
-    }
 
-    this.renderer.clip(container.parent.clip, function() {
-        textList.map(this.parseTextBounds(container), this).forEach(function(bounds, index) {
-            if (bounds) {
-                this.renderer.text(textList[index], bounds.left, bounds.bottom);
-                this.renderTextDecoration(container.parent, bounds, this.fontMetrics.getMetrics(family, size));
-            }
-        }, this);
-    }, this, container.parent);
+        this.renderer.clip(container.parent.clip, function() {
+            textList.map(this.parseTextBounds(container), this).forEach(function(bounds, index) {
+                if (bounds) {
+                    this.renderer.text(textList[index], bounds.left, bounds.bottom);
+                    this.renderTextDecoration(container.parent, bounds, this.fontMetrics.getMetrics(family, size));
+                }
+            }, this);
+        }, this, container.parent);
+    }
 };
 
 NodeParser.prototype.renderTextDecoration = function(container, bounds, metrics) {

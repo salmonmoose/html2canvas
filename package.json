@@ -47,5 +47,8 @@
     "sauceconnect": "tests/sauceconnect.js"
   },
   "homepage": "http://html2canvas.hertzen.com",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "punycode": "^2.1.0"
+  }
 }
